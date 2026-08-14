@@ -15,6 +15,9 @@ function RecipeListing({ recipe, recipe_name, description, category, img_src }) 
       {imageUrl && (
         <img className="recipe-image" src={imageUrl} alt={name} />
       )}
+      {!imageUrl && (
+        <div className="recipe-image recipe-image-placeholder" aria-hidden="true" />
+      )}
       <div className="recipe-content">
         {label && <p className="recipe-category">{label}</p>}
         <h2>{name}</h2>

@@ -15,7 +15,7 @@ function Header({ user }) {
 
     return (
         <header className="site-header">
-            <Link className="site-logo" to="/">Recipes</Link>
+            <Link className="site-logo" to="/">Kerr Recipes</Link>
             <nav className="site-actions" aria-label="Main navigation">
                 {user && <Link className="create-recipe-button" to="/recipes/new">Create Recipe</Link>}
                 {user ? (

@@ -57,8 +57,10 @@
 
 .recipe-detail-image {
     display: block;
-    width: 100%;
+    width: calc(100% - 72px);
     max-height: 520px;
+    margin: 0 36px;
+    border-radius: 14px;
     object-fit: cover;
     background: #eee8e1;
 }
@@ -154,6 +156,11 @@
 
     .recipe-detail-content {
         padding: 24px;
+    }
+
+    .recipe-detail-image {
+        width: calc(100% - 48px);
+        margin: 0 24px;
     }
 
     .recipe-meta {

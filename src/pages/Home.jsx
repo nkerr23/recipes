@@ -129,6 +129,11 @@ function Home() {
                 ))}
             </div>
             )}
+
+            <footer className="home-footer">
+                <p>Kerr Recipes</p>
+                <span>Gluten Free Deliciousness! Bon Apetit!</span>
+            </footer>
         </main>
     );
 }
