@@ -13,7 +13,7 @@ function Home() {
         setErrorMessage("");
         const { data, error } = await supabase
             .from("recipes")
-            .select("*");
+            .select("*, recipe_categories(categories(name))");
 
         if (error) {
             setErrorMessage(error.message);
@@ -26,6 +26,7 @@ function Home() {
     }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         getRecipes();
     }, [getRecipes]);
 
