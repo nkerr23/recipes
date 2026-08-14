@@ -6,8 +6,8 @@
 .eyebrow { color: #63264A; font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
 .home-intro { color: #6f675e; font-size: 1.05rem; }
 .recipe-search { position: relative; display: block; margin-top: 34px; padding-top: 22px; border-top: 1px solid rgba(216, 206, 195, .75); }
-.search-icon { position: absolute; top: 50%; left: 14px; transform: translateY(-50%); color: #63264A; font-size: 1.25rem; line-height: 1; pointer-events: none; }
-.recipe-search input { width: 100%; min-height: 54px; border: 1px solid #d8cec3; border-radius: 14px; padding: 14px 16px 14px 46px; color: #27231f; background: #fffdf9; font: inherit; box-shadow: 0 8px 24px rgba(55,43,32,.04); }
+.search-icon { position: absolute; top: calc(50% + 11px); left: 16px; transform: translateY(-50%); color: #63264A; font-size: 2rem; line-height: 1; pointer-events: none; }
+.recipe-search input { width: 100%; min-height: 54px; border: 1px solid #d8cec3; border-radius: 14px; padding: 14px 16px 14px 60px; color: #27231f; background: #fffdf9; font: inherit; box-shadow: 0 8px 24px rgba(55,43,32,.04); }
 .recipe-search input:focus { border-color: #63264A; outline: 3px solid rgba(99, 38, 74, .16); }
 .category-tabs { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 18px; }
 .category-tab { min-height: 40px; border: 1px solid #d8cec3; border-radius: 999px; padding: 0 14px; color: #B85C38; background: #fffdf9; font: inherit; font-weight: 700; cursor: pointer; }
