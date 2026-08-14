@@ -1,0 +1,21 @@
+.home-container { width: min(1120px, calc(100% - 40px)); margin: 0 auto; padding: 72px 0; text-align: left; }
+.home-header { max-width: 680px; margin-bottom: 48px; }
+.home-header h1 { margin: 4px 0 12px; color: #27231f; font-size: clamp(2.5rem, 7vw, 4.5rem); line-height: 1; letter-spacing: -.055em; }
+.eyebrow { color: #a04c2f; font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.home-intro { color: #6f675e; font-size: 1.05rem; }
+.recipe-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
+.recipe-card { overflow: hidden; border: 1px solid #e7e0d8; border-radius: 18px; background: #fff; box-shadow: 0 5px 22px rgba(55,43,32,.06); transition: transform 180ms ease, box-shadow 180ms ease; }
+.recipe-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(55,43,32,.11); }
+.recipe-image { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: #eee8e1; }
+.recipe-content { padding: 22px; }
+.recipe-content h2, .empty-message h2 { margin: 0 0 8px; color: #27231f; font-size: 1.25rem; }
+.recipe-content p, .status-message p { margin: 0; color: #746d65; line-height: 1.6; }
+.status-message { padding: 36px; border: 1px dashed #d8cec3; border-radius: 18px; background: #fff; text-align: center; }
+.error-message { border-color: #e2aaa0; background: #fff8f6; }
+.error-message button { margin-top: 18px; padding: 10px 18px; border: 0; border-radius: 999px; color: #fff; background: #a04c2f; font: inherit; font-weight: 700; cursor: pointer; }
+.error-message button:hover { background: #823c26; }
+@media (max-width: 600px) {
+    .home-container { width: min(100% - 28px, 1120px); padding: 48px 0; }
+    .home-header { margin-bottom: 32px; }
+    .recipe-list { grid-template-columns: 1fr; }
+}
