@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../supabase";
 import "./CreateRecipe.css";
 
@@ -19,14 +19,23 @@ const initialIngredient = {
     unit: "",
 };
 
+function cleanText(value) {
+    return String(value ?? "").trim();
+}
+
 function CreateRecipe() {
     const navigate = useNavigate();
+    const { recipeId } = useParams();
+    const isEditing = Boolean(recipeId);
     const [formData, setFormData] = useState(initialForm);
     const [categories, setCategories] = useState([]);
     const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
+    const [originalCategoryIds, setOriginalCategoryIds] = useState([]);
     const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
     const [imageFile, setImageFile] = useState(null);
     const [ingredients, setIngredients] = useState([initialIngredient]);
+    const [currentImageUrl, setCurrentImageUrl] = useState("");
+    const [isLoadingRecipe, setIsLoadingRecipe] = useState(isEditing);
     const [isSaving, setIsSaving] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -49,8 +58,87 @@ function CreateRecipe() {
         getCategories();
     }, [getCategories]);
 
+    const getRecipe = useCallback(async () => {
+        if (!isEditing) {
+            return;
+        }
+
+        setIsLoadingRecipe(true);
+        setErrorMessage("");
+
+        const { data: recipeData, error: recipeError } = await supabase
+            .from("recipes")
+            .select("*")
+            .eq("id", recipeId)
+            .maybeSingle();
+
+        if (recipeError) {
+            setErrorMessage(recipeError.message);
+            setIsLoadingRecipe(false);
+            return;
+        }
+
+        if (!recipeData) {
+            setErrorMessage("Recipe not found.");
+            setIsLoadingRecipe(false);
+            return;
+        }
+
+        const { data: ingredientData, error: ingredientError } = await supabase
+            .from("ingredients")
+            .select("*")
+            .eq("recipes_id", recipeId)
+            .order("sort_order", { ascending: true });
+
+        if (ingredientError) {
+            setErrorMessage(ingredientError.message);
+            setIsLoadingRecipe(false);
+            return;
+        }
+
+        const { data: categoryData, error: categoryError } = await supabase
+            .from("recipe_categories")
+            .select("category_id")
+            .eq("recipe_id", recipeId);
+
+        if (categoryError) {
+            setErrorMessage(categoryError.message);
+            setIsLoadingRecipe(false);
+            return;
+        }
+
+        setFormData({
+            title: String(recipeData.name ?? ""),
+            description: String(recipeData.description ?? ""),
+            newCategory: "",
+            prep_time: String(recipeData.prep_time ?? ""),
+            cook_time: String(recipeData.cook_time ?? ""),
+            servings: String(recipeData.servings ?? ""),
+            instructions: String(recipeData.instructions ?? ""),
+        });
+        setCurrentImageUrl(recipeData.image_url ?? "");
+        setIngredients(
+            ingredientData?.length
+                ? ingredientData.map((ingredient) => ({
+                    name: String(ingredient.name ?? ""),
+                    quantity: String(ingredient.quantity ?? ""),
+                    unit: String(ingredient.unit ?? ""),
+                }))
+                : [initialIngredient]
+        );
+        const loadedCategoryIds = categoryData?.map((category) => String(category.category_id)) ?? [];
+        setSelectedCategoryIds(loadedCategoryIds);
+        setOriginalCategoryIds(loadedCategoryIds);
+        setIsLoadingRecipe(false);
+    }, [isEditing, recipeId]);
+
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        getRecipe();
+    }, [getRecipe]);
+
     const selectedCategoryNames = categories
-        .filter((category) => selectedCategoryIds.includes(category.id))
+        .filter((category) => selectedCategoryIds.includes(String(category.id)))
         .map((category) => category.name);
 
     function handleChange(event) {
@@ -66,7 +154,7 @@ function CreateRecipe() {
     }
 
     function handleCategoryChange(event) {
-        const categoryId = Number(event.target.value);
+        const categoryId = String(event.target.value);
         setSelectedCategoryIds((currentCategoryIds) =>
             event.target.checked
                 ? [...currentCategoryIds, categoryId]
@@ -124,6 +212,7 @@ function CreateRecipe() {
             .from("categories")
             .select("id")
             .eq("name", name)
+            .limit(1)
             .maybeSingle();
 
         if (findError) {
@@ -137,21 +226,48 @@ function CreateRecipe() {
         const { data: newCategory, error: insertError } = await supabase
             .from("categories")
             .insert({ name })
-            .select("id")
-            .single();
+            .select("id");
 
         if (insertError) {
             throw insertError;
         }
 
-        return newCategory.id;
+        if (!newCategory?.[0]?.id) {
+            throw new Error("Could not create category.");
+        }
+
+        return newCategory[0].id;
+    }
+
+    async function deleteUnusedCategories(categoryIds) {
+        await Promise.all(categoryIds.map(async (categoryId) => {
+            const { count, error: countError } = await supabase
+                .from("recipe_categories")
+                .select("*", { count: "exact", head: true })
+                .eq("category_id", Number(categoryId));
+
+            if (countError) {
+                throw countError;
+            }
+
+            if (count === 0) {
+                const { error: deleteCategoryError } = await supabase
+                    .from("categories")
+                    .delete()
+                    .eq("id", Number(categoryId));
+
+                if (deleteCategoryError) {
+                    throw deleteCategoryError;
+                }
+            }
+        }));
     }
 
     async function handleSubmit(event) {
         event.preventDefault();
         setErrorMessage("");
 
-        const title = formData.title.trim();
+        const title = cleanText(formData.title);
 
         if (!title) {
             setErrorMessage("Title is required.");
@@ -161,30 +277,49 @@ function CreateRecipe() {
         setIsSaving(true);
 
         try {
-            const imageUrl = await uploadRecipeImage();
+            const uploadedImageUrl = await uploadRecipeImage();
+            const imageUrl = uploadedImageUrl ?? (currentImageUrl || null);
             const recipe = {
                 name: title,
-                description: formData.description.trim() || null,
+                description: cleanText(formData.description) || null,
                 image_url: imageUrl,
-                prep_time: formData.prep_time.trim() || null,
-                cook_time: formData.cook_time.trim() || null,
-                servings: formData.servings.trim() || null,
-                instructions: formData.instructions.trim() || null,
+                prep_time: cleanText(formData.prep_time) || null,
+                cook_time: cleanText(formData.cook_time) || null,
+                servings: cleanText(formData.servings) || null,
+                instructions: cleanText(formData.instructions) || null,
             };
 
-            const { data, error } = await supabase
-                .from("recipes")
-                .insert(recipe)
-                .select("id")
-                .single();
+            let savedRecipeId = recipeId;
 
-            if (error) {
-                throw error;
+            if (isEditing) {
+                const { error } = await supabase
+                    .from("recipes")
+                    .update(recipe)
+                    .eq("id", recipeId);
+
+                if (error) {
+                    throw error;
+                }
+            } else {
+                const { data: savedRecipes, error } = await supabase
+                    .from("recipes")
+                    .insert(recipe)
+                    .select("id");
+
+                if (error) {
+                    throw error;
+                }
+
+                savedRecipeId = savedRecipes?.[0]?.id;
+
+                if (!savedRecipeId) {
+                    throw new Error("Recipe could not be saved.");
+                }
             }
 
-            const newCategoryNames = formData.newCategory
+            const newCategoryNames = cleanText(formData.newCategory)
                 .split(",")
-                .map((categoryName) => categoryName.trim())
+                .map((categoryName) => cleanText(categoryName))
                 .filter(Boolean);
             let categoryIds = selectedCategoryIds;
 
@@ -192,33 +327,68 @@ function CreateRecipe() {
                 const newCategoryIds = await Promise.all(
                     newCategoryNames.map((categoryName) => findOrCreateCategory(categoryName))
                 );
-                categoryIds = [...categoryIds, ...newCategoryIds];
+                categoryIds = [...categoryIds, ...newCategoryIds.map((categoryId) => String(categoryId))];
             }
 
-            const uniqueCategoryIds = [...new Set(categoryIds)];
+            const uniqueCategoryIds = [...new Set(categoryIds.map((categoryId) => String(categoryId)))];
+
+            if (isEditing) {
+                const { error: deleteRecipeCategoriesError } = await supabase
+                    .from("recipe_categories")
+                    .delete()
+                    .eq("recipe_id", savedRecipeId);
+
+                if (deleteRecipeCategoriesError) {
+                    throw deleteRecipeCategoriesError;
+                }
+            }
 
             if (uniqueCategoryIds.length > 0) {
                 const { error: recipeCategoriesError } = await supabase
                     .from("recipe_categories")
-                    .insert(uniqueCategoryIds.map((categoryId) => ({
-                        recipe_id: data.id,
-                        category_id: categoryId,
-                    })));
+                    .upsert(
+                        uniqueCategoryIds.map((categoryId) => ({
+                            recipe_id: savedRecipeId,
+                            category_id: Number(categoryId),
+                        })),
+                        { onConflict: "recipe_id,category_id" }
+                    );
 
                 if (recipeCategoriesError) {
                     throw recipeCategoriesError;
                 }
             }
 
+            if (isEditing) {
+                const removedCategoryIds = originalCategoryIds.filter(
+                    (categoryId) => !uniqueCategoryIds.includes(categoryId)
+                );
+
+                if (removedCategoryIds.length > 0) {
+                    await deleteUnusedCategories(removedCategoryIds);
+                }
+            }
+
             const ingredientRows = ingredients
                 .map((ingredient, index) => ({
-                    recipes_id: data.id,
-                    name: ingredient.name.trim(),
-                    quantity: ingredient.quantity.trim() || null,
-                    unit: ingredient.unit.trim() || null,
+                    recipes_id: savedRecipeId,
+                    name: cleanText(ingredient.name),
+                    quantity: cleanText(ingredient.quantity) || null,
+                    unit: cleanText(ingredient.unit) || null,
                     sort_order: index + 1,
                 }))
                 .filter((ingredient) => ingredient.name);
+
+            if (isEditing) {
+                const { error: deleteIngredientsError } = await supabase
+                    .from("ingredients")
+                    .delete()
+                    .eq("recipes_id", savedRecipeId);
+
+                if (deleteIngredientsError) {
+                    throw deleteIngredientsError;
+                }
+            }
 
             if (ingredientRows.length > 0) {
                 const { error: ingredientsError } = await supabase
@@ -230,7 +400,7 @@ function CreateRecipe() {
                 }
             }
 
-            navigate(`/recipes/${data.id}`);
+            navigate(`/recipes/${savedRecipeId}`);
         } catch (error) {
             setErrorMessage(error.message);
         } finally {
@@ -241,10 +411,13 @@ function CreateRecipe() {
     return (
         <main className="create-recipe-page">
             <header className="create-recipe-header">
-                <p className="eyebrow">Add to cookbook</p>
-                <h1>Create Recipe</h1>
+                <p className="eyebrow">{isEditing ? "Update cookbook" : "Add to cookbook"}</p>
+                <h1>{isEditing ? "Edit Recipe" : "Create Recipe"}</h1>
             </header>
 
+            {isLoadingRecipe && <p className="status-message">Loading recipe...</p>}
+
+            {!isLoadingRecipe && (
             <form className="create-recipe-form" onSubmit={handleSubmit}>
                 <label>
                     <span>Title</span>
@@ -270,6 +443,9 @@ function CreateRecipe() {
                 <div className="form-grid">
                     <label>
                         <span>Recipe Image</span>
+                        {currentImageUrl && (
+                            <img className="current-recipe-image" src={currentImageUrl} alt="Current recipe" />
+                        )}
                         <input
                             name="image"
                             type="file"
@@ -304,7 +480,7 @@ function CreateRecipe() {
                                             <input
                                                 type="checkbox"
                                                 value={category.id}
-                                                checked={selectedCategoryIds.includes(category.id)}
+                                                checked={selectedCategoryIds.includes(String(category.id))}
                                                 onChange={handleCategoryChange}
                                             />
                                             <span>{category.name}</span>
@@ -427,9 +603,10 @@ function CreateRecipe() {
                 {errorMessage && <p className="form-error" role="alert">{errorMessage}</p>}
 
                 <button type="submit" disabled={isSaving}>
-                    {isSaving ? "Saving..." : "Save Recipe"}
+                    {isSaving ? "Saving..." : isEditing ? "Save Changes" : "Save Recipe"}
                 </button>
             </form>
+            )}
         </main>
     );
 }

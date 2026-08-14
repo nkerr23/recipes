@@ -73,7 +73,10 @@ function Recipe() {
 
     return (
         <main className="recipe-page">
-            <Link className="back-link" to="/">Back to recipes</Link>
+            <div className="recipe-page-actions">
+                <Link className="back-link" to="/">Back to recipes</Link>
+                <Link className="edit-recipe-link" to={`/recipes/${recipeId}/edit`}>Edit Recipe</Link>
+            </div>
 
             {isLoading && <p className="status-message">Loading recipe...</p>}
 
