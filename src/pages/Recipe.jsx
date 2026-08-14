@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { supabase } from "../supabase";
 import "./Recipe.css";
 
-function Recipe() {
+function Recipe({ user }) {
     const { recipeId } = useParams();
     const [recipe, setRecipe] = useState(null);
     const [ingredients, setIngredients] = useState([]);
@@ -75,7 +75,7 @@ function Recipe() {
         <main className="recipe-page">
             <div className="recipe-page-actions">
                 <Link className="back-link" to="/">Back to recipes</Link>
-                <Link className="edit-recipe-link" to={`/recipes/${recipeId}/edit`}>Edit Recipe</Link>
+                {user && <Link className="edit-recipe-link" to={`/recipes/${recipeId}/edit`}>Edit Recipe</Link>}
             </div>
 
             {isLoading && <p className="status-message">Loading recipe...</p>}
@@ -89,13 +89,19 @@ function Recipe() {
 
             {!isLoading && !errorMessage && recipe && (
                 <article className="recipe-detail">
+                    <div className="recipe-detail-content">
+                        {categories.length > 0 && <p className="recipe-categories">{categories.join(", ")}</p>}
+                        <h1>{recipe.name || "Untitled recipe"}</h1>
+                        <div className="recipe-attribution">
+                            <p>Created by {recipe.created_by || "Unknown user"}</p>
+                            <p>Last edited by {recipe.last_edited_by || "Unknown user"}</p>
+                        </div>
+                        <p>{recipe.description || "No description added yet."}</p>
+                    </div>
                     {recipe.image_url && (
                         <img className="recipe-detail-image" src={recipe.image_url} alt={recipe.name || "Recipe"} />
                     )}
-                    <div className="recipe-detail-content">
-                        {categories.length > 0 && <p className="eyebrow">{categories.join(", ")}</p>}
-                        <h1>{recipe.name || "Untitled recipe"}</h1>
-                        <p>{recipe.description || "No description added yet."}</p>
+                    <div className="recipe-detail-content recipe-detail-body">
                         {(recipe.prep_time || recipe.cook_time || recipe.servings) && (
                             <dl className="recipe-meta">
                                 {recipe.prep_time && (

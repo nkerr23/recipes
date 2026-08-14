@@ -11,7 +11,9 @@
 .create-recipe-page h1 {
     margin: 4px 0 0;
     color: #27231f;
+    font-family: "Bilona Medium", Georgia, serif;
     font-size: clamp(2.5rem, 7vw, 4.5rem);
+    font-weight: 700;
     line-height: 1;
 }
 
@@ -48,8 +50,8 @@
 
 .create-recipe-form input:focus,
 .create-recipe-form textarea:focus {
-    border-color: #a04c2f;
-    outline: 3px solid rgba(160, 76, 47, .16);
+    border-color: #63264A;
+    outline: 3px solid rgba(99, 38, 74, .16);
 }
 
 .current-recipe-image {
@@ -84,13 +86,13 @@
     border-radius: 999px;
     padding: 0 22px;
     color: #fff;
-    background: #a04c2f;
+    background: #63264A;
     font-weight: 700;
     cursor: pointer;
 }
 
 .create-recipe-form button:hover:not(:disabled) {
-    background: #823c26;
+    background: #3D0B37;
 }
 
 .create-recipe-form button:disabled {
@@ -126,7 +128,7 @@
 
 .create-recipe-form .category-dropdown-button:hover,
 .create-recipe-form .category-dropdown-button:focus {
-    border-color: #a04c2f;
+    border-color: #63264A;
     color: #27231f;
     background: #fffdf9;
 }
@@ -169,7 +171,7 @@
 
 .category-empty {
     margin: 0;
-    color: #746d65;
+    color: #B85C38;
 }
 
 .section-heading {
@@ -201,14 +203,14 @@
 .create-recipe-form .remove-ingredient-button {
     min-height: 38px;
     border: 1px solid #d8cec3;
-    color: #a04c2f;
+    color: #63264A;
     background: #fffdf9;
 }
 
 .create-recipe-form .secondary-button:hover:not(:disabled),
 .create-recipe-form .remove-ingredient-button:hover:not(:disabled) {
     color: #fff;
-    background: #a04c2f;
+    background: #63264A;
 }
 
 @media (max-width: 600px) {

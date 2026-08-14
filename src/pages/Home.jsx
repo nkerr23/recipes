@@ -63,9 +63,8 @@ function Home() {
     return (
         <main className="home-container">
             <header className="home-header">
-                <p className="eyebrow">Your personal cookbook</p>
-                <h1>My Recipes</h1>
-                <p className="home-intro">A collection of all the dishes you want to make again.</p>
+                <p className="eyebrow">Our fav family eats</p>
+                <h1>Kerr Recipes</h1>
                 <label className="recipe-search">
                     <span className="search-icon" aria-hidden="true">⌕</span>
                     <input
@@ -112,14 +111,14 @@ function Home() {
             {!isLoading && !errorMessage && recipes.length === 0 && (
                 <div className="status-message empty-message">
                     <h2>No recipes yet</h2>
-                    <p>Your recipes will appear here once you add them.</p>
+                    <p>Nothing simmering here yet.</p>
                 </div>
             )}
 
             {!isLoading && !errorMessage && recipes.length > 0 && filteredRecipes.length === 0 && (
                 <div className="status-message empty-message">
                     <h2>No matching recipes</h2>
-                    <p>Try searching for a different recipe name.</p>
+                    <p>Nothing simmering for that search.</p>
                 </div>
             )}
 

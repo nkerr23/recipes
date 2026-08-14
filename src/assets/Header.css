@@ -1,10 +1,26 @@
 .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    width: min(1120px, calc(100% - 40px));
-    margin: 0 auto;
-    padding: 22px 0;
+    width: 100%;
+    margin: 0;
+    padding: 22px max(20px, calc((100% - 1120px) / 2));
+    border-bottom: 1px solid rgba(184, 92, 56, .72);
+    background: #FFFCF5;
+}
+
+.site-header::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: -14px;
+    left: 0;
+    height: 14px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(184, 92, 56, .08), rgba(184, 92, 56, .025) 45%, rgba(184, 92, 56, 0));
 }
 
 .site-logo {
@@ -15,7 +31,13 @@
 }
 
 .site-logo:hover {
-    color: #a04c2f;
+    color: #63264A;
+}
+
+.site-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .create-recipe-button {
@@ -26,23 +48,85 @@
     padding: 0 18px;
     border-radius: 999px;
     color: #fff;
-    background: #a04c2f;
+    background: #63264A;
     font-weight: 700;
     text-decoration: none;
 }
 
 .create-recipe-button:hover {
-    background: #823c26;
+    background: #3D0B37;
+}
+
+.login-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 18px;
+    border: 1px solid #d8cec3;
+    border-radius: 999px;
+    color: #63264A;
+    background: #fffdf9;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login-button:hover {
+    border-color: #63264A;
+    background: #fff;
+}
+
+.profile-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    border: 1px solid #d8cec3;
+    border-radius: 999px;
+    padding: 4px 12px 4px 4px;
+    color: #63264A;
+    background: #fffdf9;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.profile-avatar {
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    color: #fff;
+    background: #63264A;
+    overflow: hidden;
+}
+
+.profile-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-button:hover {
+    border-color: #63264A;
+    background: #fff;
 }
 
 .site-logo:focus-visible,
-.create-recipe-button:focus-visible {
-    outline: 3px solid #a04c2f;
+.create-recipe-button:focus-visible,
+.login-button:focus-visible,
+.profile-button:focus-visible {
+    outline: 3px solid #63264A;
     outline-offset: 4px;
 }
 
 @media (max-width: 600px) {
     .site-header {
         width: min(100% - 28px, 1120px);
+        padding: 18px 0;
+    }
+
+    .profile-name {
+        display: none;
     }
 }

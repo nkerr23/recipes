@@ -1,0 +1,91 @@
+.signin-page {
+    width: min(520px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 72px 0;
+}
+
+.signin-header {
+    margin-bottom: 32px;
+}
+
+.signin-header h1 {
+    margin: 4px 0 0;
+    color: #27231f;
+    font-family: "Bilona Medium", Georgia, serif;
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.signin-form {
+    display: grid;
+    gap: 22px;
+    padding: 30px;
+    border: 1px solid #e7e0d8;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 5px 22px rgba(55,43,32,.06);
+}
+
+.signin-form label {
+    display: grid;
+    gap: 8px;
+}
+
+.signin-form span {
+    color: #27231f;
+    font-weight: 700;
+}
+
+.signin-form input {
+    width: 100%;
+    border: 1px solid #d8cec3;
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: #27231f;
+    background: #fffdf9;
+    font: inherit;
+}
+
+.signin-form input:focus {
+    border-color: #63264A;
+    outline: 3px solid rgba(99, 38, 74, .16);
+}
+
+.signin-form button {
+    justify-self: start;
+    min-height: 46px;
+    border: 0;
+    border-radius: 999px;
+    padding: 0 22px;
+    color: #fff;
+    background: #63264A;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.signin-form button:hover:not(:disabled) {
+    background: #3D0B37;
+}
+
+.signin-form button:disabled {
+    cursor: not-allowed;
+    opacity: .68;
+}
+
+.form-success {
+    margin: 0;
+    color: #2f7d4c;
+    font-weight: 700;
+}
+
+@media (max-width: 600px) {
+    .signin-page {
+        width: min(100% - 28px, 520px);
+        padding: 48px 0;
+    }
+
+    .signin-form {
+        padding: 22px;
+    }
+}

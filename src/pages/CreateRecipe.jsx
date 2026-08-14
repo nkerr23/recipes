@@ -23,7 +23,11 @@ function cleanText(value) {
     return String(value ?? "").trim();
 }
 
-function CreateRecipe() {
+function getUserName(user) {
+    return cleanText(user?.user_metadata?.name) || cleanText(user?.email) || "Unknown user";
+}
+
+function CreateRecipe({ user }) {
     const navigate = useNavigate();
     const { recipeId } = useParams();
     const isEditing = Boolean(recipeId);
@@ -287,6 +291,7 @@ function CreateRecipe() {
                 cook_time: cleanText(formData.cook_time) || null,
                 servings: cleanText(formData.servings) || null,
                 instructions: cleanText(formData.instructions) || null,
+                last_edited_by: getUserName(user),
             };
 
             let savedRecipeId = recipeId;
@@ -303,7 +308,10 @@ function CreateRecipe() {
             } else {
                 const { data: savedRecipes, error } = await supabase
                     .from("recipes")
-                    .insert(recipe)
+                    .insert({
+                        ...recipe,
+                        created_by: getUserName(user),
+                    })
                     .select("id");
 
                 if (error) {
